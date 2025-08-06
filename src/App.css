@@ -12,6 +12,13 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+html, body {
+  overscroll-behavior: none;
+}
+
+canvas {
+  touch-action: none; /* ✅ This disables scroll/pinch on touch devices */
+}
 
 .App-header {
   background-color: #282c34;

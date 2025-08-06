@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "leafy-mender-450302-b4",
+  "private_key_id": "7b9779825074262ba15d20a0c7f83675fce2a1b2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDW8KIgPD1w1hEU\ncHofRninWhHqlLv4MO6rl/Ybx81wE8e5LXDzRMfQKpNVWLwK/zyCEW54v58uN7dI\n/O9Y10YEt/NRYdtbdNrcbqORnNFuEWcZTuo744lAUZox6aTp18j1k8li7lVX6lRH\nbSGaNAOVaJyvqm/69L2KX/ZnxUCrFs4faPtbuojAv06r/rQOlTv6lK4HhKH7djxH\nTjiy4H88KFVnZfUKPrzSHx2Xf7NVmA45SvkZZKIm62jOnmjI5UM6fzvsFSp+2mNl\nrJK2FJbSUUCQ8IDhr2wMtj6akiyLYaVqEIcm3YtUrg+KViTrLj90EghC1diupe9b\nPMRfHQSNAgMBAAECggEAG1Wd4KiYjbWDlYxaU4jkRjAjsCf7IayjZaodL9pAi5zQ\nXQHk5+Ma4CPR+dwfiex8tvPdjzibV0bZpcwY6jzyWB5GsNZXjbF2NetSHO4LCkrn\nSCYrjrM4nLfj+q4CfYSmN2j0hwLVUqlnz2+XAuPTgtg7ePGdbRZb1nGuxfKlbzxq\n7qVKo2k4D3oRUe82oqSPBgiaAtxr1vnST9uuqm5uuMcoG8Y6axdi8PMbqJcRnFec\nfc+H0ygyE6yKyJlUADPAg7UMK53WtZVLXjCC19DCsZtYpzWplp2oAOMBpDakrFYy\nXHbdZ6WODMoKVGXv48LoGanMIdxNAUhGbqvf2yNlQQKBgQD6ctwdDD3dZRyWEz6J\n6Ic9sU2kToczJBz0ubg/ETwWylo+UL2Knpk/xBJlRmx/RZaCp4mSoFqf0AHjO/94\nKnJRNNtTLXVVy0inuRAJRIgzyvPF8Cg2QA05b3RlngSLowUHb58KR5tiPwURPmVo\nmSOLrqHyHLjwTgU6LlfbBtxxYQKBgQDbtEij3h6mRLuvDzRn8/trqXmn9KhEfMdP\nRcXQaE7v1ThaybxEeg7fgPSis74B2Felev6U8J1cS1/yjDaUjDYjE4WYtbdtBeMh\nluYxL/OrB8s/up61a9u1jdKAmGlLnFwardjF+aEM9C1f1hN3W434U5feoBo1eKd5\nU9UPtVAmrQKBgQCAG46yIRfoDpdvwMpFmrbK/M29VRndNATHvdQcFoHJGprMs1ow\n9O1o66+JNFu9Qmg5zt8VLIcOpkTA6mjEG9o75bCmvGL/jqtMd+JXC0IsVA0b27uF\n/H+HOJaugATNNIcXBaaxiG1X9Opvpp4SwfqnsZ1PDhgfe5k66IeyFrFeIQKBgGwk\nBwUxlaB9gGwgbcklHIHXv1veXtynFmt8imuUjBYcu0pktdh2w89baA6Vrla2KB35\ntkmVTb9aEnYOcecYRKVrPHz4JLrzBONJpTBcy/FJOs+5idj+p/xrPEuzuVBQPD2d\niG+Z+Z2oqpTbiGVdmTm726rm3z+mjbh4fQzoT/VZAoGAcBqQL4eMWMvsCQCVTBaN\nAi6C1FCW+ef2O38pFTf6wxthJw8kB0Bu4fuU2Qu4jpD1YYPgsWGmTQaO0UJyJ4Qq\nHIPm1lgegG1J4ZyrF2lZWGdWq3pa1kq9zdVBEn6UKqOMrdJIxr/kT5ESKV2pJTos\nhmYnGEQ8bKUaUJpJbozc/4M=\n-----END PRIVATE KEY-----\n",
+  "client_email": "whiteboard-ocr-service@leafy-mender-450302-b4.iam.gserviceaccount.com",
+  "client_id": "105313592901016519147",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/whiteboard-ocr-service%40leafy-mender-450302-b4.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

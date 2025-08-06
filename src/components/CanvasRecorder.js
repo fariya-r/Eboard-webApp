@@ -1,70 +1,70 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
 import { getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dus9iefbh/video/upload';
-const UPLOAD_PRESET = 'whiteboard_upload';
+const UPLOAD_URL = 'http://localhost:5000/api/upload-recording';
 
-const CanvasRecorder = ({ canvasRef }) => {
+const CanvasRecorder = () => {
   const mediaRecorderRef = useRef(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
   const chunks = useRef([]);
 
-  const startRecording = () => {
-    if (!canvasRef?.current) {
-      alert('❗ Canvas not found.');
-      return;
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { mediaSource: 'screen' },
+        audio: true, // Optional: add audio if needed
+      });
+
+      chunks.current = [];
+
+      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks.current, { type: 'video/webm' });
+        const file = new File([blob], 'recording.webm', { type: 'video/webm' });
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setIsUploading(true);
+        try {
+          const res = await axios.post(UPLOAD_URL, formData);
+          const { fileUrl } = res.data;
+
+          // Optional: Save metadata in Firestore here if needed
+          const auth = getAuth();
+          const user = auth.currentUser;
+          console.log('Uploaded:', fileUrl, user?.email);
+
+          alert('✅ Recording saved!');
+        } catch (err) {
+          console.error('Upload error:', err);
+          alert('❌ Upload failed.');
+        } finally {
+          setIsUploading(false);
+        }
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+
+      // Stop if user ends screen share manually
+      stream.getVideoTracks()[0].addEventListener('ended', () => {
+        stopRecording();
+      });
+    } catch (err) {
+      console.error('Recording failed:', err);
+      alert('❗ Screen recording permission denied or failed.');
     }
-
-    chunks.current = [];
-
-    const stream = canvasRef.current.captureStream(30);
-    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunks.current.push(e.data);
-    };
-
-    recorder.onstop = async () => {
-      const blob = new Blob(chunks.current, { type: 'video/webm' });
-      const file = new File([blob], 'recording.webm', { type: 'video/webm' });
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', UPLOAD_PRESET);
-
-      setIsUploading(true);
-      try {
-        const res = await axios.post(CLOUDINARY_URL, formData);
-        const downloadURL = res.data.secure_url;
-
-        // Optional: Auth check
-        const auth = getAuth();
-        const user = auth.currentUser;
-
-        await addDoc(collection(db, 'recordings'), {
-          url: downloadURL,
-          createdAt: serverTimestamp(),
-          uid: user?.uid || null, // optional
-        });
-
-        alert('✅ Recording uploaded successfully!');
-      } catch (error) {
-        console.error('❌ Upload Error:', error);
-        alert('Upload failed. Please try again.');
-      } finally {
-        setIsUploading(false);
-      }
-    };
-
-    mediaRecorderRef.current = recorder;
-    recorder.start();
-    setIsRecording(true);
   };
 
   const stopRecording = () => {

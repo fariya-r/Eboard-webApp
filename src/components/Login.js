@@ -1,35 +1,77 @@
-import React, { useState } from 'react';
-import { auth, googleProvider, db } from '../firebase/firebase';
+import React, { useState, useContext } from 'react';
+import { auth, googleProvider, db, facebookProvider } from '../firebase/firebase';
+import { UserContext } from '../context/UserContext';
+import { FaGoogle, FaFacebookF } from 'react-icons/fa';
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
-
+import { FacebookAuthProvider } from "firebase/auth";
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
+  const { setUser, setRole } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // 🔐 Email/Password Login
   const loginWithEmail = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      const userRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(userRef);
-      const userData = docSnap.data();
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-      console.log("✅ Logged in as:", userData?.role || "Unknown");
-      navigate("/whiteboardactivity");
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        const userRole = userData.role;
+
+        setUser(user);
+        setRole(userRole);
+
+        if (userRole === 'Admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        alert('User role not found!');
+      }
     } catch (error) {
-      alert("Login failed: " + error.message);
+      console.error(error.message);
+      alert('Login failed.');
     }
   };
+  const loginWithFacebook = async () => {
+    try {
+      const result = await signInWithPopup(auth, facebookProvider);
+      const user = result.user;
 
-  // 🔐 Google Login
+      // You can use the same logic here to determine the role
+      let role = "Student";
+      if (user.email.endsWith("@school.edu")) {
+        role = "Teacher";
+      }
+
+      await setDoc(doc(db, "users", user.uid), {
+        name: user.displayName || 'Facebook User',
+        email: user.email,
+        role,
+        assignedClasses: [],
+        savedBoards: [],
+        sessionHistory: []
+      }, { merge: true });
+
+      if (role === "Teacher") {
+        navigate("/dashboard");
+      } else {
+        alert("You are not authorized to access this app.");
+      }
+
+    } catch (error) {
+      alert("Facebook login failed: " + error.message);
+    }
+  };
   const loginWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -49,8 +91,13 @@ export default function Login() {
         sessionHistory: []
       }, { merge: true });
 
-      console.log("✅ Google login as:", role);
-      navigate("/whiteboard");
+      if (role === "Teacher") {
+        navigate("/dashboard");
+      } else {
+        // ❌ Don’t navigate for other roles
+        alert("You are not authorized to access this app.");
+      }
+
     } catch (error) {
       alert("Google login failed: " + error.message);
     }
@@ -153,49 +200,53 @@ export default function Login() {
                 Forgot Password?
               </a>
             </div>
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={loginWithEmail}
+                className="w-full max-w-xs bg-indigo-900 text-white py-2.5 px-4 rounded-lg text-base font-medium shadow-md hover:bg-indigo-800 hover:shadow-lg transition-all duration-300 ease-in-out"
+              >
+                Login
+              </button>
+            </div>
 
-            <button
-              onClick={loginWithEmail}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 rounded-xl text-lg font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition duration-300 transform hover:scale-105"
-            >
-              Login
-            </button>
 
           </div>
 
           <div className="flex-shrink-0 mt-6">
-            <div className="text-center text-gray-500 mb-4">or continue with</div>
-            <div className="flex justify-center space-x-6">
-              <button
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition duration-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-blue-600">
-                  <path d="M12 2C6.477 2 2 6.477 2 12c0 5.016 3.657 9.178 8.441 9.878V14.65H8.084v-2.65h2.357V10.05c0-2.327 1.417-3.607 3.504-3.607 1.002 0 1.868.074 2.12.107v2.44h-1.44c-1.13 0-1.348.538-1.348 1.325v1.73H16.8l-.43 2.65h-2.228v7.228C18.343 21.178 22 17.016 22 12c0-5.523-4.477-10-10-10z" />
-                </svg>
-              </button>
-
-              <button
-                onClick={loginWithGoogle}
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition duration-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-red-500">
-                  <path d="M12 11.222v2.778h6.25c-.278 1.556-1.111 2.889-2.5 3.778l-2.5 1.944v-2.556c-1.389.278-2.778.444-4.167.444-3.889 0-7.056-2.5-7.056-6.25s3.167-6.25 7.056-6.25c2.056 0 3.889.833 5.167 2.056l2.111-2.111c-1.667-1.667-3.889-2.778-6.167-2.778-5.778 0-10.444 4.667-10.444 10.444s4.667 10.444 10.444 10.444c5.778 0 9.722-4.056 9.722-9.999 0-.667-.056-1.333-.167-1.944H12z" />
-                </svg>
-              </button>
-            </div>
-          </div>
+  <div className="text-center text-gray-500 mb-4">or continue with</div>
+  <div className="flex justify-center space-x-4">
+    <button
+      onClick={loginWithFacebook}
+      className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-300 hover:bg-gray-200 hover:shadow-md transition duration-200"
+      aria-label="Login with Facebook"
+    >
+      <FaFacebookF className="text-blue-600 h-6 w-6" />
+    </button>
+    <button
+      onClick={loginWithGoogle}
+      className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-300 hover:bg-gray-200 hover:shadow-md transition duration-200"
+      aria-label="Login with Google"
+    >
+      <FaGoogle className="text-red-500 h-6 w-6" />
+    </button>
+  </div>
+</div>
 
         </div>
 
-        {/* Right Section: The Blue Rounded Box with Illustration */}
-        {/* This div now explicitly has its own background, rounded corners, and shadow. */}
-        <div className="w-full lg:w-1/2 bg-blue-600 rounded-3xl shadow-2xl p-8 sm:p-12 md:p-16 flex items-center justify-center relative overflow-hidden">
+        
+        <div
+          className="w-full lg:w-1/2 rounded-3xl shadow-2xl p-8 sm:p-12 md:p-16 flex items-center justify-center relative overflow-hidden"
+          style={{ backgroundColor: '#010141' }}
+        >
 
-          <div className="text-white flex items-center justify-center w-full h-full">
-            <img src="assets/logo.png" alt="Logo" className="max-w-xs w-full" />
+          <div className="text-white flex flex-col items-center justify-center w-full h-full">
+            <img src="assets/logo.png" alt="Logo" className="max-w-xs w-full mb-4" />
+            <h2 className="text-2xl font-semibold">eBoard by e.Solutions</h2>
+            <p className="text-sm mt-2 text-white text-center">Empowering digital classrooms</p>
           </div>
-
         </div>
+
       </div>
     </div>
   );
