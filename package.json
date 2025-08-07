@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+        "serve": "^14.2.0",
     "@google-cloud/vision": "^5.3.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -60,7 +61,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "serve": "^14.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.1"
   }
