@@ -4,7 +4,7 @@
 // Instead, create a backend endpoint (e.g., in your Laravel app) that acts as a proxy
 // to call the Google Cloud Vision API.
 
-const OCR_BACKEND_ENDPOINT = 'http://localhost:5000/api/ocr-process'; // Your Laravel endpoint
+// const OCR_BACKEND_ENDPOINT = 'http://localhost:5000/api/ocr-process'; // Your Laravel endpoint
 
 /**
  * Sends file data (base64) to the backend for OCR processing.

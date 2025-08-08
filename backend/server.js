@@ -98,7 +98,7 @@ if (!fs.existsSync(recordingsDir)) {
 
 // ✅ Middlewares
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: process.env.REACT_APP_API_URL.replace('/api', ''),
   methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
@@ -125,7 +125,8 @@ app.post('/api/upload-recording', upload.single('file'), (req, res) => {
     return res.status(400).json({ message: 'No file uploaded' });
   }
 
-  const fileUrl = `http://localhost:${PORT}/recordings/${req.file.filename}`;
+  // const fileUrl = `http://localhost:${PORT}/recordings/${req.file.filename}`;
+  const fileUrl = `${process.env.REACT_APP_API_URL.replace('/api', '')}/recordings/${req.file.filename}`;
   res.json({ fileUrl });
 });
 

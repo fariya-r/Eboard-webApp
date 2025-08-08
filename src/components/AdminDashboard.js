@@ -19,7 +19,8 @@ export default function AdminDashboard() {
   const [userProfile, setUserProfile] = useState(null);
   const navigate = useNavigate();
 
-  const API_BASE = 'http://localhost:5000/api';
+  // const API_BASE = 'http://localhost:5000/api';
+  const API_BASE = process.env.REACT_APP_API_URL;
   const ADMIN_EMAIL = 'admin@eboard.com';
 
   const handleLogout = async () => {
@@ -105,8 +106,8 @@ export default function AdminDashboard() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/teacher/${uid}`);
-      alert('🗑️ Teacher deleted!');
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/teacher/${uid}`);
+            alert('🗑️ Teacher deleted!');
       fetchTeachers();
     } catch (err) {
       console.error('Error deleting teacher:', err);

@@ -10,13 +10,12 @@ const RecordingGallery = () => {
   const [recordings, setRecordings] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const API_BASE = 'http://localhost:5000/api';
-
+  const API_BASE = process.env.REACT_APP_API_URL;
   const fetchRecordings = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/recordings');
-      setRecordings(res.data);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/recordings`);
+            setRecordings(res.data);
     } catch (error) {
       console.error('⚠️ Failed to fetch recordings:', error);
     } finally {
@@ -28,8 +27,7 @@ const RecordingGallery = () => {
     if (!window.confirm('Are you sure you want to delete this recording?')) return;
 
     try {
-      await axios.post('http://localhost:5000/api/delete-recording', { filename });
-      alert('✅ Recording deleted');
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/delete-recording`, { filename });      alert('✅ Recording deleted');
       fetchRecordings();
     } catch (err) {
       console.error('Delete failed:', err);
@@ -66,7 +64,7 @@ const RecordingGallery = () => {
     fetchRecordings();
     window.addEventListener('click', () => window.focus());
   }, []);
-  
+
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -75,11 +73,11 @@ const RecordingGallery = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-<Header
+      <Header
         handleLogout={handleLogout}
         title="My Recordings" // <-- Here is the custom title
       />
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-48">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
@@ -100,11 +98,17 @@ const RecordingGallery = () => {
                          transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1"
             >
               {/* Video with poster at #t=10, as requested */}
-              <video
+              {/* <video
                 src={`http://localhost:5000/recordings/${rec.filename}#t=10`}
                 controls
                 className="w-full h-52 object-cover rounded-xl mb-4 border border-gray-200"
                 poster={`http://localhost:5000/recordings/${rec.filename}#t=10`}
+              /> */}
+              <video
+                src={`${process.env.REACT_APP_API_URL}/recordings/${rec.filename}#t=10`}
+                controls
+                className="w-full h-52 object-cover rounded-xl mb-4 border border-gray-200"
+                poster={`${process.env.REACT_APP_API_URL}/recordings/${rec.filename}#t=10`}
               />
 
               <div className="flex items-center text-sm text-gray-500 mb-4">
@@ -113,21 +117,22 @@ const RecordingGallery = () => {
               </div>
 
               <div className="flex justify-end space-x-2">
-  <button
-    onClick={() => handleCopyLink(`http://localhost:5000/recordings/${rec.filename}`)}
-    className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full transition-colors"
-    title="Share Link"
-  >
-    <FaShareAlt className="h-4 w-4" />
-  </button>
-  <button
-    onClick={() => handleDelete(rec.filename)}
-    className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full transition-colors"
-    title="Delete Recording"
-  >
-    <FaTrash className="h-4 w-4" />
-  </button>
-</div>
+                <button
+                  // onClick={() => handleCopyLink(`http://localhost:5000/recordings/${rec.filename}`)}
+                  onClick={() => handleCopyLink(`${process.env.REACT_APP_API_URL}/recordings/${rec.filename}`)}
+                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full transition-colors"
+                  title="Share Link"
+                >
+                  <FaShareAlt className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(rec.filename)}
+                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full transition-colors"
+                  title="Delete Recording"
+                >
+                  <FaTrash className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

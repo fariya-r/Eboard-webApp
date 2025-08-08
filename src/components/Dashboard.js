@@ -18,8 +18,7 @@ const Dashboard = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [teachers, setTeachers] = useState([]);
 
-  const API_BASE = 'http://localhost:5000/api';
-
+  const API_BASE = process.env.REACT_APP_API_URL;
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/');

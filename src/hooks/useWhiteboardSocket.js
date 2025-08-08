@@ -29,7 +29,7 @@ const useWhiteboardSocket = (
   // Effect 2: Connect to the socket and join the room
   useEffect(() => {
     if (sessionId) {
-      const newSocket = io('http://localhost:5000');
+      const newSocket = io(process.env.REACT_APP_API_URL);
       setSocket(newSocket);
       
       newSocket.emit('join-room', sessionId);
