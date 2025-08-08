@@ -144,6 +144,13 @@ app.get('/api/recordings', async (req, res) => {
   }
 });
 
+const frontendPath = path.join(__dirname, '../src/build');
+app.use(express.static(frontendPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
 // ✅ Start server
 server.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
