@@ -91,10 +91,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage }); // ✅ Now this is safe
 
-// ✅ Ensure the recordings directory exists
-if (!fs.existsSync(recordingsDir)) {
-  fs.mkdirSync(recordingsDir);
-}
+
 
 app.use(cors({
   origin: process.env.API_BASE_URL.replace('/api', ''),
