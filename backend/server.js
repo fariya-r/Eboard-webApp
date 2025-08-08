@@ -96,12 +96,12 @@ if (!fs.existsSync(recordingsDir)) {
   fs.mkdirSync(recordingsDir);
 }
 
-// ✅ Middlewares
 app.use(cors({
-  origin: process.env.REACT_APP_API_URL.replace('/api', ''),
+  origin: process.env.API_BASE_URL.replace('/api', ''),
   methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
+
 
 app.use(express.json());
 app.use(bodyParser.json({ limit: '20mb' }));
@@ -126,7 +126,7 @@ app.post('/api/upload-recording', upload.single('file'), (req, res) => {
   }
 
   // const fileUrl = `http://localhost:${PORT}/recordings/${req.file.filename}`;
-  const fileUrl = `${process.env.REACT_APP_API_URL.replace('/api', '')}/recordings/${req.file.filename}`;
+  const fileUrl = `${process.env.API_BASE_URL.replace('/api', '')}/recordings/${req.file.filename}`;
   res.json({ fileUrl });
 });
 
