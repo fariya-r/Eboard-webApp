@@ -1,6 +1,4 @@
-// src/components/WhiteboardTextLayer.js
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { FaBold, FaItalic, FaUnderline, FaTimes } from 'react-icons/fa';
 
 const WhiteboardTextLayer = ({
@@ -17,9 +15,9 @@ const WhiteboardTextLayer = ({
   draggingIndex,
   setDraggingIndex,
   setDragOffset,
-  dragOffset
+  dragOffset,
+  saveState
 }) => {
-
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (draggingIndex === null) return;
@@ -30,8 +28,8 @@ const WhiteboardTextLayer = ({
           if (index === draggingIndex) {
             return {
               ...box,
-              x: clientX - dragOffset.x, // ✅ Now dragOffset is correctly used
-              y: clientY - dragOffset.y // ✅ Now dragOffset is correctly used
+              x: clientX - dragOffset.x,
+              y: clientY - dragOffset.y
             };
           }
           return box;
@@ -49,24 +47,40 @@ const WhiteboardTextLayer = ({
     };
 
     const handleMouseUp = () => {
+      if (draggingIndex !== null) {
+        saveState();
+      }
       setDraggingIndex(null);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [draggingIndex, dragOffset, setTextBoxes, socket, sessionId, setDraggingIndex]); // ✅ dragOffset is now in the dependency array
-  
+  }, [draggingIndex, dragOffset, setTextBoxes, socket, sessionId, setDraggingIndex, saveState]);
+
+  const handleFinalizeTextBox = useCallback(() => {
+    if (activeTextBox && activeTextBox.text.trim() !== '') {
+      const newTextBox = { ...activeTextBox };
+      setTextBoxes(prev => [...prev, newTextBox]);
+      if (socket) {
+        socket.emit('text-box-created', {
+          room: sessionId,
+          textBox: newTextBox,
+        });
+      }
+      saveState();
+    }
+    setActiveTextBox(null);
+  }, [activeTextBox, setTextBoxes, socket, sessionId, setActiveTextBox, saveState]);
+
   return (
     <>
-      {/* 1. Toolbar for current active textbox */}
       {activeTextBox && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded shadow flex items-center space-x-2 z-50">
-          {/* Font dropdown */}
           <select
             value={activeTextBox.font}
             onChange={(e) => setActiveTextBox({ ...activeTextBox, font: e.target.value })}
@@ -77,7 +91,6 @@ const WhiteboardTextLayer = ({
             <option value="Georgia">Georgia</option>
             <option value="Times New Roman">Times New Roman</option>
           </select>
-          {/* Bold button */}
           <button
             className={`px-2 py-1 border rounded ${activeTextBox.bold ? 'bg-gray-300' : ''}`}
             onClick={() =>
@@ -86,7 +99,6 @@ const WhiteboardTextLayer = ({
           >
             <FaBold />
           </button>
-          {/* Italic button */}
           <button
             className={`px-2 py-1 border rounded ${activeTextBox.italic ? 'bg-gray-300' : ''}`}
             onClick={() =>
@@ -95,7 +107,6 @@ const WhiteboardTextLayer = ({
           >
             <FaItalic />
           </button>
-          {/* Underline button */}
           <button
             className={`px-2 py-1 border rounded ${activeTextBox.underline ? 'bg-gray-300' : ''}`}
             onClick={() =>
@@ -104,7 +115,6 @@ const WhiteboardTextLayer = ({
           >
             <FaUnderline />
           </button>
-          {/* Font size dropdown */}
           <select
             value={activeTextBox.size}
             onChange={(e) => setActiveTextBox({ ...activeTextBox, size: parseInt(e.target.value) })}
@@ -115,28 +125,14 @@ const WhiteboardTextLayer = ({
             <option value="24">24</option>
             <option value="32">32</option>
           </select>
-          {/* Color input */}
           <input
             type="color"
             value={activeTextBox.color}
             onChange={(e) => setActiveTextBox({ ...activeTextBox, color: e.target.value })}
             className="w-8 h-8 rounded"
           />
-          {/* Done button */}
           <button
-            onClick={() => {
-              if (activeTextBox && activeTextBox.text.trim() !== '') {
-                const newTextBox = { ...activeTextBox };
-                setTextBoxes(prev => [...prev, newTextBox]);
-                if (socket) {
-                  socket.emit('text-box-created', {
-                    room: sessionId,
-                    textBox: newTextBox,
-                  });
-                }
-              }
-              setActiveTextBox(null);
-            }}
+            onClick={handleFinalizeTextBox}
             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
           >
             Done
@@ -144,7 +140,6 @@ const WhiteboardTextLayer = ({
         </div>
       )}
 
-      {/* 2. Editable light-blue textarea while typing */}
       {activeTextBox && (
         <textarea
           autoFocus
@@ -177,7 +172,6 @@ const WhiteboardTextLayer = ({
         />
       )}
 
-      {/* 3. Finalized text boxes (rendered as static divs) */}
       {textBoxes.map((box, index) => (
         <div
           key={index}
@@ -204,6 +198,7 @@ const WhiteboardTextLayer = ({
               setTextBoxes(prev => prev.filter((_, i) => i !== index));
               setActiveTextBox(box);
               setTool('text');
+              saveState();
             }}
             style={{
               fontFamily: box.font,
@@ -226,9 +221,10 @@ const WhiteboardTextLayer = ({
           />
           {hoveredBox === index && (
             <button
-              onClick={() =>
-                setTextBoxes(prev => prev.filter((_, i) => i !== index))
-              }
+              onClick={() => {
+                setTextBoxes(prev => prev.filter((_, i) => i !== index));
+                saveState();
+              }}
               className="absolute top-[-10px] right-[-10px] bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center p-0 cursor-pointer"
             >
               <FaTimes className="text-xs" />

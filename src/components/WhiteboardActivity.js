@@ -46,7 +46,9 @@ const WhiteboardActivity = () => {
     // ✅ ADDED: Ruler state ko wapas add kiya gaya hai, kyunki yeh `useCanvasDrawing` mein nahi hai.
     const [rulerPosition, setRulerPosition] = useState({ x: 50, y: 50 });
     const [isDraggingRuler, setIsDraggingRuler] = useState(false);
-    
+    const [circles, setCircles] = useState([]);
+    const [stickyNotes, setStickyNotes] = useState([]);
+
     const [savedBoards, setSavedBoards] = useState([]);
     const [showSavedBoards, setShowSavedBoards] = useState(false);
     const [currentBoardId, setCurrentBoardId] = useState(null);
@@ -74,14 +76,28 @@ const WhiteboardActivity = () => {
         });
         return () => unsubscribe();
     }, [auth]);
-  
+    
+    const saveState = useCallback(() => {
+        if (!canvasRef.current) return;
+        const canvasData = canvasRef.current.toDataURL();
+        const newState = {
+            canvasData,
+            textBoxes,
+            circles, // Now 'circles' is defined and can be used
+            stickyNotes,
+        };
+        setHistory(prevHistory => {
+            const newHistory = [...prevHistory, newState];
+            return newHistory.slice(-20);
+        });
+        setRedoStack([]);
+    }, [canvasRef, textBoxes, circles, stickyNotes]);
     
     const {
         tool, setTool,
         color, setColor,
         lineWidth, setLineWidth,
         isDrawing, setIsDrawing,
-        circles, setCircles,
         compassPosition, setCompassPosition,
         isDraggingCompass, setIsDraggingCompass,
         compassAngle, setCompassAngle,
@@ -89,7 +105,6 @@ const WhiteboardActivity = () => {
         pivotPoint, setPivotPoint,
         currentPoint, setCurrentPoint,
         lineStart, setLineStart,
-        stickyNotes, setStickyNotes,
         dragStartOffset, setDragStartOffset,
         startDrawing, drawLine, finishDrawing, handleMouseDown, getScaledCoordinates, draw
     } = useCanvasDrawing(
@@ -99,7 +114,8 @@ const WhiteboardActivity = () => {
         sessionId,
         socket,
         backgroundSnapshot, // Pass the state variable here
-        setBackgroundSnapshot // And the state setter here
+        setBackgroundSnapshot,
+        saveState // And the state setter here
     );
     
     const { getSnapshotWithElements } = useCanvasSnapshot(
@@ -136,6 +152,7 @@ const WhiteboardActivity = () => {
         auth
     );
 
+    
     const handleUpdateStickyNoteText = useCallback((id, newText) => {
         setStickyNotes(prevNotes => 
             prevNotes.map(note => 
@@ -344,7 +361,9 @@ const WhiteboardActivity = () => {
         note={note}
         onUpdateText={handleUpdateStickyNoteText}
         onUpdatePosition={handleUpdateStickyNotePosition}
-        onDelete={handleDeleteStickyNote} // ✅ Add this line
+        onDelete={handleDeleteStickyNote} 
+        saveState={saveState}
+        // ✅ Add this line
     />
 ))}
 
@@ -385,7 +404,9 @@ const WhiteboardActivity = () => {
                 draggingIndex={draggingIndex}
                 setDraggingIndex={setDraggingIndex}
                 setDragOffset={setDragOffset}
-                dragOffset={dragOffset}   
+                dragOffset={dragOffset} 
+                saveState={saveState}
+  
                          />
 
 

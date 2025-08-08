@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const uploadDir = path.join(__dirname, 'uploads');
 const recordingsDir = path.join(__dirname, 'recordings');
 const extractedTextRoutes = require('./routes/extractedText');
@@ -111,7 +111,7 @@ app.use('/api', extractedTextRoutes); // The base path must match your frontend
 // ✅ Serve static recordings and uploads
 app.use('/recordings', express.static(recordingsDir));
 app.use('/storage', express.static(uploadDir));
-app.use(require('./routes/delete'));
+app.use('/api/delete-route', require("./routes/delete"));
 
 // ✅ Mount custom routes
 app.use('/api', fileRoutes);

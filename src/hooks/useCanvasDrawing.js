@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const useCanvasDrawing = (canvasRef, contextRef, scale, sessionId, socket, backgroundSnapshot, setBackgroundSnapshot) => {
+const useCanvasDrawing = (canvasRef, contextRef, scale, sessionId, socket, backgroundSnapshot, setBackgroundSnapshot, saveState) => {
     const [tool, setTool] = useState('pen');
     const [color, setColor] = useState('#000000');
     const [lineWidth, setLineWidth] = useState(2);
@@ -198,6 +198,7 @@ const useCanvasDrawing = (canvasRef, contextRef, scale, sessionId, socket, backg
         if (socket) {
             socket.emit('drawing', { room: sessionId, action: 'finish', image: snapshot });
         }
+        saveState();
     }, [isDrawing, contextRef, getScaledCoordinates, tool, lineStart, color, lineWidth, canvasRef, setBackgroundSnapshot, setLineStart, setIsDrawing, sessionId, socket]);
     
     
