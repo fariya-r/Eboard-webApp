@@ -145,5 +145,5 @@ app.get('/api/recordings', async (req, res) => {
 
 // ✅ Start server
 server.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`✅ Server running att http://localhost:${PORT}`);
 });
